@@ -120,6 +120,61 @@ homicide_df =
   nest(data = resolved)
 ```
 
+# Problem 2
 
+Start with a datafram containing all file names.
+```{r}
+names_df = list.files('./data')
+file_names_df = str_c("./data/",names_df)
+```
+
+Iterate over file names and read in data.`
+
+```{r include=FALSE}
+output = vector("list", length = 20)
+output = purrr::map(file_names_df, read_csv)
+
+for(i in 1:20){
+  output[[i]]  = mutate(output[[i]], name = names_df[[i]])
+}
+
+
+long_data = bind_rows(output) 
+
+```
+Here is the longitudinal dataset for the further analyses.
+
+```{r}
+ tidy_long_data = 
+  long_data %>% 
+  separate(name, into = c("group","id","csv")) %>% 
+  select(-csv) %>% 
+  select(id,group,everything()) %>% 
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    names_prefix = "week_",
+    values_to = "observational_value"
+  ) 
+```
+
+Making the spaghetti plot.
+
+```{r}
+tidy_long_data %>% 
+  group_by(id,group) %>% 
+  ggplot(aes(x = week, y = observational_value, group = id,color = id)) + 
+  geom_line() + 
+  labs(
+    title = "Longitudinal Study",
+    x = "time",
+    y = "observations",
+    caption = "Measurements by Control and Experimental Arm through Time"
+  ) + 
+  facet_grid(. ~ group)
+
+```
+
+We could see the similarity and differences between control and experimental group. First, everyone changed through 8 weeks, up and down. It is obviously that the control group generally kept in the same level through 8 weeks, however, the experimental group increased through time.
 
 
