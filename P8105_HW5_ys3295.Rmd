@@ -31,7 +31,7 @@ Read in the data.
 
 ```{r}
 homicide_df = 
-  read_csv("data/homicide_data/homicide-data.csv") %>% 
+  read_csv("homicide_data/homicide-data.csv") %>% 
   mutate(
     city_state = str_c(city, state, sep = "_"),
     resolved = case_when(
@@ -106,7 +106,7 @@ city_prop_test = function(df) {
 
 
 homicide_df = 
-  read_csv("data/homicide_data/homicide-data.csv") %>% 
+  read_csv("homicide_data/homicide-data.csv") %>% 
   mutate(
     city_state = str_c(city, state, sep = "_"),
     resolved = case_when(
@@ -124,8 +124,8 @@ homicide_df =
 
 Start with a datafram containing all file names.
 ```{r}
-names_df = list.files('./data')
-file_names_df = str_c("./data/",names_df)
+names_df = list.files('lda_data')
+file_names_df = str_c("lda_data/",names_df)
 ```
 
 Iterate over file names and read in data.`
@@ -138,11 +138,10 @@ for(i in 1:20){
   output[[i]]  = mutate(output[[i]], name = names_df[[i]])
 }
 
-
 long_data = bind_rows(output) 
 
 ```
-Here is the longitudinal dataset for the further analyses.
+Building up the dataset for the further analyses.
 
 ```{r}
  tidy_long_data = 
@@ -166,15 +165,14 @@ tidy_long_data %>%
   ggplot(aes(x = week, y = observational_value, group = id,color = id)) + 
   geom_line() + 
   labs(
-    title = "Longitudinal Study",
-    x = "time",
+    x = "weeks",
     y = "observations",
-    caption = "Measurements by Control and Experimental Arm through Time"
-  ) + 
+    caption = "Longitudinal Study for Control and Experimental Arm through Time") + 
+  theme(plot.caption = element_text(hjust=0))+
   facet_grid(. ~ group)
 
 ```
 
-We could see the similarity and differences between control and experimental group. First, everyone changed through 8 weeks, up and down. It is obviously that the control group generally kept in the same level through 8 weeks, however, the experimental group increased through time.
+Several similarity and differences between control and experimental group are shown in the plots. The observation values is fluctuating during the 8 weeks.  The figures indicates that the trend for control group kept in the same level overall through 8 weeks while the experimental group showed an increasing trend during this period.
 
 
