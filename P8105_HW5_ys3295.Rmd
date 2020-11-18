@@ -173,6 +173,118 @@ tidy_long_data %>%
 
 ```
 
-Several similarity and differences between control and experimental group are shown in the plots. The observation values is fluctuating during the 8 weeks.  The figures indicates that the trend for control group kept in the same level overall through 8 weeks while the experimental group showed an increasing trend during this period.
+* The observation values is fluctuating during the 8 weeks. The figures indicates that the trend for control group tends to keep constant through 8 weeks while the experimental group showed an increasing trend during this period.
+
+
+# Problem 3
+
+Setting up the function 
+```{r}
+sim_mean = function(n = 30, mu = 0, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma),
+  )
+  
+   sim_data %>% 
+      t.test() %>% 
+      broom::tidy() 
+}
+```
+
+Testing the function
+```{r}
+sim_results = rerun(5000, sim_mean(30, 0, 5)) %>% 
+  bind_rows()
+```
+
+Simulating across multiple means
+```{r}
+mu_list = 
+  list(
+    "mu_1" = 0,
+    "mu_2" = 1, 
+    "mu_3" = 2, 
+    "mu_4" = 3, 
+    "mu_5" = 4,
+    "mu_6" = 5,
+    "mu_7" = 6
+    )
+output = vector("list", length = 7)
+
+for (i in 1:7) {
+  output[[i]] = rerun(5000, sim_mean(mu = mu_list[[i]])) %>% 
+    bind_rows
+}
+```
+
+```{r}
+sim_results =
+  tibble(
+  mu = c(0, 1, 2, 3, 4, 5, 6)
+) %>% 
+  mutate(
+    output_lists = map(.x = mu, ~ rerun(5000, sim_mean(mu = .x))),
+    estimate_dfs = map(output_lists, bind_rows)
+  ) %>% 
+  select(-output_lists) %>% 
+  unnest(estimate_dfs) %>% 
+  select(mu,estimate, p.value)
+```
+
+Make a plot showing the proportion of times the null was rejected.
+```{r}
+test_df = 
+  sim_results %>% 
+  mutate(
+    test_results = case_when(p.value < 0.05 ~ "rejected",
+                            p.value >= 0.05 ~ "failed to reject")
+  ) %>% 
+  select(mu, test_results) %>% 
+  group_by(mu) %>%
+  summarize(
+    reject_num = sum(test_results == "rejected")
+  ) %>% 
+  mutate(power = reject_num / 5000)
+
+test_df %>% 
+  ggplot(aes(x = mu, y = power)) +
+  geom_line()+
+  labs(
+    title = "The proportion of times the null was rejected")
+
+```
+
+* The figure showed that the power will increase with the effect size increasing, given that alpha and sample size keep constant.
+
+Make two plots.
+```{r}
+df = 
+  sim_results %>% 
+  mutate(
+    test_results = case_when(p.value < 0.05 ~ "reject",
+                            p.value >= 0.05 ~ "fail to reject")
+         ) %>%
+  group_by(mu) %>% 
+  mutate(est_mean = mean(estimate)) %>% 
+  ungroup() %>% 
+  group_by(mu, test_results) %>% 
+  filter(test_results == "reject") %>% 
+  mutate(est_mean_reject = mean(estimate)) %>% 
+  pivot_longer(
+    cols = c(est_mean, est_mean_reject),
+    names_to = "type",
+    values_to = "est_mean_mu"
+  )
+
+df %>% 
+  ggplot(aes(x = mu, y = est_mean_mu, color = type)) + 
+  geom_point() + 
+  geom_path()+
+  labs(title = "The average estimated mu vs. the true mu",
+       y= "average estimated mu")
+```
+
+
 
 
