@@ -257,6 +257,8 @@ test_df %>%
 
 * The figure showed that the power will increase with the effect size increasing, given that alpha and sample size keep constant.
 
+**********
+
 Make two plots.
 ```{r}
 df = 
@@ -272,7 +274,7 @@ df =
   filter(test_results == "reject") %>% 
   mutate(est_mean_reject = mean(estimate)) %>% 
   pivot_longer(
-    cols = c(est_mean, est_mean_reject),
+    cols = c(est_mean, est_mean_rej),
     names_to = "type",
     values_to = "est_mean_mu"
   )
@@ -285,6 +287,7 @@ df %>%
        y= "average estimated mu")
 ```
 
+* According to the plot, it is found that the sample average of estimated mu across test for which the null is rejected is different from the true mu. As the effect size increases, the sample average estimated mu across test for which the null is rejected is closer or approximately equals to the true value of mu. For the test in which the null is rejected, the random error is larger. In other words, if only estimated mu for these samples are calculated, larger random error will be generated and the estimated mean will be more away from the true mu. 
 
 
 
