@@ -261,8 +261,7 @@ test_df %>%
 
 Make two plots.
 ```{r}
-df = 
-  sim_results %>% 
+df=sim_results %>% 
   mutate(
     test_results = case_when(p.value < 0.05 ~ "reject",
                             p.value >= 0.05 ~ "fail to reject")
@@ -272,14 +271,14 @@ df =
   ungroup() %>% 
   group_by(mu, test_results) %>% 
   filter(test_results == "reject") %>% 
-  mutate(est_mean_reject = mean(estimate)) %>% 
+  mutate(est_mean_rej = mean(estimate)) %>% 
   pivot_longer(
     cols = c(est_mean, est_mean_rej),
     names_to = "type",
     values_to = "est_mean_mu"
   )
 
-df %>% 
+df%>% 
   ggplot(aes(x = mu, y = est_mean_mu, color = type)) + 
   geom_point() + 
   geom_path()+
